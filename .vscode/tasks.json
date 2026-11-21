@@ -1,0 +1,8 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    { "label": "Android: assembleDebug", "type": "shell", "command": ".\\gradlew.bat assembleDebug", "group": { "kind": "build", "isDefault": true }, "problemMatcher": [] },
+    { "label": "Android: test", "type": "shell", "command": ".\\gradlew.bat testDebugUnitTest lintDebug", "group": "test", "problemMatcher": [] },
+    { "label": "Android: installDebug", "type": "shell", "command": ".\\gradlew.bat installDebug", "problemMatcher": [] }
+  ]
+}
