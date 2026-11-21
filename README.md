@@ -2,6 +2,10 @@
 
 Android向けの小型NTP同期オーバーレイ時計です。パッケージは `jp.gunlod.chronosync`。時刻を `HH:mm:ss.SSS` / `Asia/Tokyo` / 24時間で表示し、表示時刻だけを−9999～+9999ms、1ms単位で補正できます。Rootやアクセシビリティサービスは使用しません。
 
+Google Play向けの署名・AAB・掲載素材・公開手順は [公開手順](docs/PLAY_STORE_RELEASE.md) を参照してください。
+
+Webから直接配布する署名付きAPKの作成・インストールは [Web配布手順](docs/WEB_APK_RELEASE.md) を参照してください。
+
 ## ビルド
 
 - JDK 17 または21（`JAVA_HOME` を設定）

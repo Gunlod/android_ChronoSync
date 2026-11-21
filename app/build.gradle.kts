@@ -1,7 +1,28 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
+}
+val uploadSigning = Properties().apply {
+    val configFile = rootProject.file("keystore.properties")
+    if (configFile.isFile) configFile.inputStream().use { load(it) }
+}
+fun signingValue(name: String, environment: String): String? =
+    providers.environmentVariable(environment).orNull?.takeIf { it.isNotBlank() }
+        ?: uploadSigning.getProperty(name)?.takeIf { it.isNotBlank() }
+val uploadStore = signingValue("storeFile", "CHRONOSYNC_STORE_FILE")
+val uploadStorePassword = signingValue("storePassword", "CHRONOSYNC_STORE_PASSWORD")
+val uploadAlias = signingValue("keyAlias", "CHRONOSYNC_KEY_ALIAS")
+val uploadKeyPassword = signingValue("keyPassword", "CHRONOSYNC_KEY_PASSWORD")
+val signingValues = listOf(uploadStore, uploadStorePassword, uploadAlias, uploadKeyPassword)
+val hasUploadSigning = signingValues.all { it != null }
+check(signingValues.none { it != null } || hasUploadSigning) {
+    "Upload signing configuration is incomplete. Set all four values in keystore.properties or CHRONOSYNC_* environment variables."
+}
+check(!providers.gradleProperty("chronosync.requireReleaseSigning").map(String::toBoolean).getOrElse(false) || hasUploadSigning) {
+    "A signed release requires a signing key. See docs/WEB_APK_RELEASE.md or docs/PLAY_STORE_RELEASE.md."
 }
 android {
     namespace = "jp.gunlod.chronosync"
@@ -19,7 +40,21 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    buildTypes { release { isMinifyEnabled = false } }
+    signingConfigs {
+        if (hasUploadSigning) create("upload") {
+            storeFile = rootProject.file(uploadStore!!)
+            storePassword = uploadStorePassword
+            keyAlias = uploadAlias
+            keyPassword = uploadKeyPassword
+        }
+    }
+    buildTypes {
+        release {
+            isMinifyEnabled = false
+            isDebuggable = false
+            if (hasUploadSigning) signingConfig = signingConfigs.getByName("upload")
+        }
+    }
 }
 kotlin { compilerOptions { jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17) } }
 dependencies {

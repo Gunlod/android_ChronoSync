@@ -23,6 +23,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -99,6 +100,15 @@ class MainActivity : ComponentActivity() {
 
 @Composable private fun SettingsScreen(vm: MainViewModel, state: MainUiState, toggle: (Boolean) -> Unit, permission: () -> Unit) {
     val s = state.settings
+    var showPrivacy by remember { mutableStateOf(false) }
+    if (showPrivacy) {
+        AlertDialog(
+            onDismissRequest = { showPrivacy = false },
+            title = { Text("プライバシーポリシー") },
+            text = { Text(stringResource(R.string.privacy_policy_text), Modifier.verticalScroll(rememberScrollState())) },
+            confirmButton = { TextButton(onClick = { showPrivacy = false }) { Text("閉じる") } },
+        )
+    }
     Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         Column(Modifier.fillMaxSize().safeDrawingPadding().verticalScroll(rememberScrollState()).padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
@@ -171,6 +181,9 @@ class MainActivity : ComponentActivity() {
             }
             SettingsCard("アプリ情報") {
                 Text("ChronoSync ${BuildConfig.VERSION_NAME}", fontWeight = FontWeight.Bold)
+                Text("開発者：Gunlod")
+                Text("サポート：gunlod.0122+playstore@gmail.com", style = MaterialTheme.typography.bodySmall)
+                TextButton(onClick = { showPrivacy = true }) { Text("プライバシーポリシー") }
                 Text("NTPの往復通信からUTC時刻を推定し、同期後はスリープ時間を含む単調増加時計で時刻を進めます。端末の日付変更は同期済み時計に影響しません。")
                 Text("ミリ秒の表示桁数は、1msの同期精度を保証しません。通信経路の非対称、端末の発振器、描画・画面の遅延で誤差が生じます。概算誤差はRTT等と20ppmの仮定に基づく目安です。1時間経過または概算誤差100ms超でDEGRADEDと表示します。")
                 Text("自動再同期は行いません。再同期失敗時は以前の同期時計をDEGRADEDとして維持します。プロセス終了後は新しく同期してください。")
